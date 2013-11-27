@@ -1,3 +1,6 @@
+#python
+*.pyc
+*.pyo
 bottle.py
 *.csv
 

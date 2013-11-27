@@ -3,17 +3,19 @@
     <head>
         <title></title>
         <style type="text/css">
-         .q0-11{fill:rgb(38,0,165)}
-         .q1-11{fill:rgb(215,48,39)}
-         .q2-11{fill:rgb(244,109,67)}
-         .q3-11{fill:rgb(253,174,97)}
-         .q4-11{fill:rgb(254,224,139)}
-         .q5-11{fill:rgb(255,255,191)}
-         .q6-11{fill:rgb(217,239,139)}
-         .q7-11{fill:rgb(166,217,106)}
-         .q8-11{fill:rgb(102,189,99)}
-         .q9-11{fill:rgb(26,152,80)}
-         .q10-11{fill:rgb(104,155,0)}
+         .d3-tooltip{
+            position: absolute;
+            z-index: 10;
+            visibility: hidden;
+            padding: 2px;
+            color:white;
+            border-style: solid;
+            border-color: "silver";
+            border-radius: 4px;
+            border-width: 1px;
+            background-color: black;
+            max-width: 450px;
+         }
         </style>
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
@@ -22,6 +24,7 @@
         <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap-theme.min.css">
 
         <!-- Latest compiled and minified JavaScript -->
+        
         <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
         <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/js/bootstrap.min.js"></script>
@@ -29,69 +32,92 @@
     </head>
     <body>
         <div class="container">
-        <div id="topics"></div>
-        <table class="table" id="topic-data">
-            %for row in xrange(som_height):
-            <tr style="height: 40px;overflow:scroll;">
-                %for col in xrange(som_width):
-                    <td>
-                        %if len(data[row][col])>0:
-                            <a href="/unit/{{row}}/{{col}}" onmouseover="preview(this)" id="c{{row}}_{{col}}" class="somcell">{{len(data[row][col])}}</a>
-                        %end
-                        %#{{"%d %d" % (row, col)}}
-                    </td>
-                %end
-            </tr>
-            %end
-        </table>
+            <div id="topics" class=".col-md-8"></div>
         </div>
         
         <script type="text/javascript">
-            function preview(obj){
-                obj.rel="[tooltip]"
-                console.log($(obj))
-                $.get(obj.href, {
-                }, function(data) {
-                    obj.title = data.keyword.join("\n")
-                    $(obj).tooltip({placement:'right'})
-                });
-            }
+            var cells, dmin, dmax;
             
-            function pair(){
-                s = this.id;
-                a = s.split("_")
-                return [parseInt(a[0].substr(1)), parseInt(a[1])];
-            }
-            function numtopic(){
-                return parseInt(this.textContent);
-            }
+            d3.json("/unitdata.json", function(data){
+                cells = data.result
+                values = cells.map(function(d){return d.num})
+                dmin = d3.min(values)
+                dmax = Math.round(d3.max(values)/3)
+                update(cells)
+            })
             
-            var container = d3.select("#topics").append("svg").attr("width", 400).attr("height", 400)
-            tmp = d3.select("#topic-data").selectAll(".somcell")
+            var container = d3.select("#topics").append("svg").attr("width", 600).attr("height", 600)
             
-            var coords = tmp.datum(pair).data()
-            var values = tmp.datum(numtopic).data()
-            
-            var color = d3.scale.quantize()
-                                .domain([d3.min(values), d3.max(values)])
-                                .range(d3.range(11).map(function(d){ return "q"+d+"-11";}))
+            //prepare tooltip
+            var tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "d3-tooltip")
+                .text("a simple tooltip");
+                
+                
+            //draw background
             container.append("rect")
                 .attr("x", 0)
                 .attr("y",0)
-                .attr("width", 400)
-                .attr("height", 400)
+                .attr("width", 600)
+                .attr("height", 600)
                 .style("fill","black")
-            for(var i=0; i<coords.length; ++i){
-                pt = coords[i]
-                y = pt[0]
-                x = pt[1]
-                var circle = container.append("circle")
-                circle.attr("cx", x * 10+5)
-                circle.attr("cy", y * 10+5)
-                circle.attr("r", 4)
-                circle.attr("class", function(d) { return color(values[i]); })
+            
+            function c(x){
+                //return Math.round((x-dmin)/dmax)*(dmax-dmin);
+                return 190-Math.round((x-dmin)/dmax*(190));
             }
-            d3.selectAll("circle").data(values)
+                
+            function update(dataset)
+            {
+                var circles = container.selectAll("circle").data(dataset).enter() .append("circle")
+                    .attr("cx", function(d){return d.x*15+8;}).attr("cy", function(d){return d.y*15+8;})
+                    //.attr("x", function(d){return d.x*14+2;}).attr("y", function(d){return d.y*14+2;})
+                    .attr("r", 6)
+                    //.attr("width", 12).attr("height", 12)
+                    //.style("fill", function(d){return "rgb(160,"+c(d.num)+",50)";})
+                    .style("fill", function(d){return "hsl("+c(d.num)+",50%,50%)";})
+                    //.style("fill", "teal")
+                    .on("mouseover", function(){
+                        //console.log(this)
+                        var el = d3.select(this)
+                        e = el[0]
+                        //console.log(this)
+                        var title = $(this).attr("title")
+                        if (title==undefined){
+                            d = el.data()[0]
+                            d3.json("/unit/"+d.y+"/"+d.x, function(data){
+                                content = data.keyword.join(", ")
+                                el.attr("rel", "[tooltip]")
+                                el.attr("title", content)
+                                tooltip.text(data.keyword.join(", "))
+                                tooltip.style("visibility", "visible");
+                            })
+                        }
+                        else{
+                            tooltip.text(title)
+                            tooltip.style("visibility", "visible");
+                        }
+                        //console.log(el)
+                        //console.log(el.data()[0].v)
+                    })
+                    .on("mousemove", function(){return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");})
+                    .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+                    /*
+                    var circles = container.selectAll("text")
+                        .data(dataset)
+                        .enter()
+                        .append("text")
+                        .text(function(d){return d.num})
+                        .attr("x", function(d){return d.x*15+7-2*((d.num+"").length);})
+                        .attr("y", function(d){return d.y*15+12;})
+                        .style("stroke", "none")
+                        .style("fill","white")
+                        .style("font-size", "7pt")
+                    */
+            }
+                
         </script>
+        <div style="height: 400px;">&nbsp;</div>
     </body>
 </html>

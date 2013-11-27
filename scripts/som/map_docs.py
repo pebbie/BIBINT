@@ -67,7 +67,7 @@ from bottle import *
 @view("index")
 def index():
     global unit
-    return dict(som_width=unit["XDIM"], som_height=unit["YDIM"], data=unit["DATA"])
+    return {}
     
 @route("/unit/<y:int>/<x:int>")
 def get_cell(y,x):
@@ -78,6 +78,17 @@ def get_cell(y,x):
 def dump_unit():
     global unit
     return unit["DATA"]
+    
+@route("/unitdata.json")
+def unit_d3():
+    global unit
+    result = []
+    for row in xrange(unit["YDIM"]):
+        for col in xrange(unit["XDIM"]):
+            num_key = len(unit['DATA'][row][col])
+            if num_key>0:
+                result.append(dict(x=col,y=row,num=num_key))
+    return dict(result=result)
     
 @route("/docs.json")
 def dump_docs():
