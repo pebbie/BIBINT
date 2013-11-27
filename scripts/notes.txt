@@ -1,4 +1,40 @@
-﻿# SPRINGER BOOK SECTION #
+﻿# Core development notes #
+
+# use case #
+- user make a new project
+- user search for a specific term
+- system execute whole workflow in the background
+- show calculated analysis output
+
+## architecture ##
+
+ * crawling
+ - digital library portal/site handler plugin : interact with search, extract content
+    - ieeexplore
+    - dblp
+    - acm portal
+    - google scholar
+    - citeseer
+ - url filter plugin : determine site handler based on url pattern
+ - http header filter plugin : determine site handler based on http response header
+ - content filter plugin
+    - determine site handler based on html content
+    - extract content from a document (e.g. PDF)
+ * storage : abstract data access for analysis
+    - filesystem storage
+    - rdb storage
+    - rdf storage
+    - network (cloud/hadoop) storage
+ * analysis
+ - spatialize : make one aspect (e.g: keyword/subject) as spatial reference then map other aspects (pub, author) to this space
+ - predict : make prediction based on a selected model
+ * web frontend
+ - interact with user
+ - display visualization output
+ 
+# site handling notes #
+
+## SPRINGER BOOK SECTION ##
 
 curl "http://dx.doi.org/10.1007/978-1-4614-7535-4_11"
  
@@ -15,7 +51,7 @@ append ".bib" extension
 
 curl "http://link.springer.com/export-citation/chapter/10.1007/978-1-4614-7535-4_11.bib" 
 
-# DBLP #
+## DBLP ##
 
 http://dblp.org/search/api/?q=semantic*%20web*&h=10&c=4&f=0&format=json
 
@@ -43,3 +79,25 @@ curl "http://www.worldscientific.com/action/downloadCitation" -H "Content-Type: 
 >>The URL has moved <a href="http://www.worldscientific.com/action/downloadCitation?prg140729=12b45a00-01f3-448a-bb10-1d05ea947110&cookieSet=1">here</a>
 
 * bib does not contain keyword
+
+## Biomed central ##
+* doi url
+http://dx.doi.org/10.1186/2041-1480-4-1
+
+* has abstract and keyword
+* redirected to jbiomedsem
+
+## aaai ##
+http://www.aaai.org/Library/Symposia/Spring/2008/ss08-01-013.php
+
+short page containing title, author, abstract, date("Submitted: Mmm dd, YYYY"), and classification ("Subjects: \d+.\d ")
+
+## IGI Global ##
+
+http://dx.doi.org/10.4018/joeuc.2006100104
+
+* cannot be inferred from header, must use curl
+
+curl redirected
+
+page has title, author with affiliation, abstract

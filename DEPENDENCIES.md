@@ -11,6 +11,11 @@ bibtordf dependencies:
 rdflib_sqlalchemy
 sqlalchemy
 
+dblp script dependencies
+==================
+requests
+curl installation
+
 web interface dependencies:
 ====================
 bottlepy>=0.10 (optional for web)

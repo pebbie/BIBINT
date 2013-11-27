@@ -1,1 +1,9 @@
 bottle.py
+*.csv
+
+#somtoolbox files
+*.prop
+*.tv
+*.vec
+*.gz
+*.map

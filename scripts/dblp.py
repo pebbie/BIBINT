@@ -1,6 +1,7 @@
 """filename : dblp.py
     description : script for extracting information from dblp website
 """
+import os
 import requests
 import json
 from urlparse import urlparse
@@ -50,7 +51,7 @@ def doc_url(doc):
 def extract_types(doclist):
     types = {}
     for d in doclist:
-        dtype = d['info']['type']
+        dtype = doc_type(d)
         if dtype in types:
             types[dtype] += 1
         else:
@@ -158,11 +159,46 @@ def is_doi_url(url):
     """
     return 'dx.doi.org' == url.netloc
     
+def is_ieee_url(url):
+    """determines whether the server is ieee from url
+        @param url : parsed url
+    """
+    return 'ieeecomputersociety.org' in url.netloc
+    
+def is_springer_url(url):
+    """determines whether the server is springer from url
+        @param url : parsed url
+    """
+    return 'www.springerlink.com' in url.netloc
+    
+def is_aaai_url(url):
+    """determines whether the server from url
+        @param url : parsed url
+    """
+    return 'aaai.org' in url.netloc
+    
+def is_html(req):
+    """check if the resource is html
+    """
+    return 'content-type' in req.headers and ('text/html' in req.headers['content-type'])
+    
 def determine_server(urls):
+    """skeleton for determining handling
+    """
     for url in urls:
         print url, 
         purl = urlparse(url)
-        if is_doi_url(purl):
+        
+        if is_acm_url(purl):
+            print "is acm"
+        elif is_ieee_url(purl):
+            print "is ieee"
+        elif is_springer_url(purl):
+            print "is springer"
+        elif is_aaai_url(purl):
+            print "is aaai"
+        else:
+        #elif is_doi_url(purl):
             r =  requests.get(url)
             print r.status_code,
         
@@ -170,18 +206,25 @@ def determine_server(urls):
                 print "is springer"
             elif is_ieee(r):
                 print "is ieee"
+            elif is_worldsci(r):
+                print "is worldscientific"
+            elif is_arxiv(r):
+                print "is arxiv"
+            elif is_sciencedirect(r):
+                print "is arxiv"
             else:
                 print json.dumps(r.headers, indent=2)
-                
-        elif is_acm_url(url):
-            print "is acm"
+                # get extra info from curl
+                if is_html(r):
+                    print os.system("curl %s" % url)
+            
     
 #####################
 # main                                       #
 #####################
 
 if __name__ == "__main__":
-    result = search("semantic web", 30)
+    result = search("semantic web", 50)
     years = extract_years(result)
     print sorted(years.items(), key=lambda x: x[1], reverse=True)
    
@@ -192,5 +235,5 @@ if __name__ == "__main__":
    
     print len(result)
    
-    determine_server(urls)
+    determine_server(urls[30:40])
     
