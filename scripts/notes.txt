@@ -1,0 +1,45 @@
+﻿# SPRINGER BOOK SECTION #
+
+curl "http://dx.doi.org/10.1007/978-1-4614-7535-4_11"
+ 
+<HTML><HEAD><TITLE>Handle Redirect</TITLE></HEAD>
+<BODY><A HREF="http://link.springer.com/10.1007/978-1-4614-7535-4_11">http://lin
+k.springer.com/10.1007/978-1-4614-7535-4_11</A></BODY></HTML>
+D:\work\TUWien\phd\tuwien\codes\BIBINT>
+
+from urlparse import urlparse
+
+if address = "http://link.springer.com/"
+insert "export-citation/chapter/"
+append ".bib" extension
+
+curl "http://link.springer.com/export-citation/chapter/10.1007/978-1-4614-7535-4_11.bib" 
+
+# DBLP #
+
+http://dblp.org/search/api/?q=semantic*%20web*&h=10&c=4&f=0&format=json
+
+h : hit (amount of record requested)
+f : first (starting offset from result)
+
+## worldscientific ##
+
+http://www.worldscientific.com/doi/abs/10.1142/S0218843003000747
+
+* has keywords & abstract in page
+http://www.worldscientific.com/doi/ref/10.1142/S0218843003000747
+
+* pdf access : requires login
+http://www.worldscientific.com/doi/pdf/10.1142/S0218843003000747
+http://www.worldscientific.com/doi/pdfplus/10.1142/S0218843003000747
+
+* export citation
+curl "http://www.worldscientific.com/action/downloadCitation" -H "Cookie: I2KBRCK=1; SERVER=WZ6myaEXBLG/pcSW2Veamw==; SERVER=WZ6myaEXBLG/pcSW2Veamw==; MAID=2j1+y5NXYx2x5OdCfaIgfw==; MAID=2j1+y5NXYx2x5OdCfaIgfw==; JSESSIONID=iaax8QY7kNmTx-C0pexku; JSESSIONID=iaax8QY7kNmTx-C0pexku; __utma=75134996.1865247006.1385513953.1385513953.1385513953.1; __utmb=75134996.4.10.1385513953; __utmc=75134996; __utmz=75134996.1385513953.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __atuvc=4"%"7C48" -H "Origin: http://www.worldscientific.com" -H "Accept-Encoding: gzip,deflate,sdch" -H "Host: www.worldscientific.com" -H "Accept-Language: en-US,en;q=0.8,id;q=0.6,ms;q=0.4" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Cache-Control: max-age=0" -H "Referer: http://www.worldscientific.com/action/showCitFormats?href="%"2Fdoi"%"2Fabs"%"2F10.1142"%"2FS0218843003000747&title=AN+ONTOLOGY+FOR+SEMANTIC+INTEGRATION+OF+LIFE+SCIENCE+WEB+DATABASES&doi=10.1142"%"2FS0218843003000747" -H "Connection: keep-alive" --data "doi=10.1142"%"2FS0218843003000747&downloadFileName=wspc_ijcis12_275&include=cit&format=bibtex&direct=on&submit=Download+article+citation+data" --compressed
+
+* this url redirects to another url
+curl "http://www.worldscientific.com/action/downloadCitation" -H "Content-Type: application/x-www-form-urlencoded" --data "doi=10.1142"%"2FS0218843003000747&downloadFileName=wspc_ijcis12_275&include=cit&format=bibtex&direct=on&submit=Download+article+citation+data" --compressed
+
+* access to redirected url requires cookie
+>>The URL has moved <a href="http://www.worldscientific.com/action/downloadCitation?prg140729=12b45a00-01f3-448a-bb10-1d05ea947110&cookieSet=1">here</a>
+
+* bib does not contain keyword

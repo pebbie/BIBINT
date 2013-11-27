@@ -300,12 +300,15 @@ if __name__ == "__main__":
     #result = json.load(open("output_author.json"))
     #crawl([article['articleId'] for article in result['items'] if 'articleId' in article])
     #crawl()
+    
+    """
     if len(sys.argv)>2: #articleId target_dir
         download_one(sys.argv[1], sys.argv[2])
     elif len(sys.argv)>1 and sys.argv[1]=="--fix":
         fix("data")
     else:
         crawl()
+        """
     
     
     #print json.dumps(parse_citmap(fetch(get_citation_map("1559623"))), indent=4, sort_keys=True)
