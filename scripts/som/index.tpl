@@ -15,7 +15,34 @@
             border-width: 1px;
             background-color: black;
             max-width: 450px;
+            float: left;
          }
+         
+         #years{
+            height: 600px;
+            overflow:auto;
+            overflow-x:hidden;
+         }
+         #authors{
+            height: 600px;
+            overflow-x:hidden;
+            overflow-y:auto;
+         }
+        
+        /* CSS3 scrollbar styling */        
+         ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            border-radius: 10px;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+        }
         </style>
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
@@ -32,7 +59,9 @@
     </head>
     <body>
         <div class="container">
-            <div id="topics" class=".col-md-8"></div>
+            <div id="topics" class="col-md-7"></div>
+            <div id="years" class="col-md-2"><h4>Year</h4></div>
+            <div id="authors" class="col-md-3"><h4>Authors</h4></div>
         </div>
         
         <script type="text/javascript">
@@ -67,6 +96,14 @@
                 //return Math.round((x-dmin)/dmax)*(dmax-dmin);
                 return 190-Math.round((x-dmin)/dmax*(190));
             }
+            
+            function update_cells(el, x, y)
+            {
+                d3.json("/unit/"+y+"/"+x, function(data){
+                    el.attr("rel", "[tooltip]")
+                    el.attr("title", data.keyword.join(", "))
+                })
+            }
                 
             function update(dataset)
             {
@@ -74,6 +111,7 @@
                     .attr("cx", function(d){return d.x*15+8;}).attr("cy", function(d){return d.y*15+8;})
                     //.attr("x", function(d){return d.x*14+2;}).attr("y", function(d){return d.y*14+2;})
                     .attr("r", 6)
+                    .attr("id", function(d){ return "_unit_"+d.y+"_"+d.x})
                     //.attr("width", 12).attr("height", 12)
                     //.style("fill", function(d){return "rgb(160,"+c(d.num)+",50)";})
                     .style("fill", function(d){return "hsl("+c(d.num)+",50%,50%)";})
@@ -116,6 +154,38 @@
                         .style("font-size", "7pt")
                     */
             }
+            
+            var years;
+            var rawyears;
+            d3.json("/years.json", function(data){
+                rawyears = data;
+                years = data.results.bindings.map(function(d){ return {year: parseInt(d.year.value.substr(0, 4)), count:parseInt(d.yearlycount.value)} })
+                d3.select("#years").selectAll("li")
+                    .data(years)
+                    .enter()
+                    .append("li")
+                    .text(function(d){ return d.year+" ("+d.count+")" })
+                    .on("click", function(obj){
+                        console.log(obj)//data point
+                        console.log(this)//element (li)
+                    })
+            })
+            
+            var authors;
+            d3.json("/authors.json", function(data){
+                authors = data.results.bindings.map(function(d){ return {name: d.autor.value, count:parseInt(d.pubcount.value)} })
+                d3.select("#authors").selectAll("li")
+                    .data(authors)
+                    .enter()
+                    .append("li")
+                    .text(function(d){ return d.name.substr(5).replace("_", ", ")+" ("+d.count+")" })
+                    .on("click", function(obj){
+                        console.log(obj)//data point
+                        console.log(this)//element (li)
+                    })
+            })
+            
+            
                 
         </script>
         <div style="height: 400px;">&nbsp;</div>

@@ -1,6 +1,11 @@
 from read_output import parse_som_unit
 from csv2som import filter_quote
+import requests
+import rdflib
 
+from sparql_request import run_sparql
+
+endpoint = "http://localhost:8890/sparql/"
 unit = None
 docs = None
 dloc = None
@@ -61,6 +66,10 @@ def inv_keyword_pos(map):
                 result[keyword] = (col, row)
     return result
 
+#
+#   Web interface
+#
+    
 from bottle import *
 
 @route("/")
@@ -99,6 +108,34 @@ def dump_docs():
 def dump_dloc():
     global dloc
     return dloc
+    
+@route("/years.json")
+def get_years():
+    global endpoint
+    query = """
+    SELECT
+     ?year, COUNT(?year) as ?yearlycount 
+    from <http://pebbie.net/bibint/1/> where { 
+    ?doc dcterms:issued ?year. 
+    } 
+    GROUP BY ?year
+    ORDER BY DESC(?year)
+    """
+    return run_sparql(endpoint, query)
+    
+@route("/authors.json")
+def get_authors():
+    global endpoint
+    query = """select 
+      ?autor, COUNT(?autor) as ?pubcount 
+        from <http://pebbie.net/bibint/1/> 
+        where { 
+              ?doc dc:creator ?autor. 
+        } 
+        GROUP BY ?autor
+        ORDER BY DESC(?pubcount) 
+        LIMIT 100"""
+    return run_sparql(endpoint, query)
 
 if __name__ == "__main__":
     unit = parse_som_unit("0\\AUTH_KW.unit.gz")
