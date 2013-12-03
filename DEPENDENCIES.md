@@ -19,3 +19,4 @@ curl installation
 web interface dependencies:
 ====================
 bottlepy>=0.10 (optional for web)
+Paste (default deployment server)
